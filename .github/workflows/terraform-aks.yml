@@ -47,6 +47,12 @@ jobs:
           # subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           # client-secret: ${{ secrets.ARM_CLIENT_SECRET }}
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Set Azure Subscription
+        run: az account set --subscription "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+
+      - name: Debug Azure Account
+        run: az account show
 
       # ----------------------------
       # Terraform Setup
