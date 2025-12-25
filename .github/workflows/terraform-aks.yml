@@ -9,9 +9,9 @@ on:
       - .github/workflows/terraform-aks.yml
   workflow_dispatch:
 
-permissions:
-  # contents: read
-  id-token: write
+# permissions:
+#   # contents: read
+#   id-token: write
 
 jobs:
   terraform:
