@@ -3,7 +3,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
   location            = var.location
   resource_group_name = var.resource_group_name
   dns_prefix          = var.dns_prefix
-
   kubernetes_version        = var.kubernetes_version
   sku_tier                  = "Free"
   role_based_access_control_enabled = true
@@ -12,6 +11,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   default_node_pool {
     name                = "kubercicd01"
+    auto_scaling_enabled = false
     vm_size             = var.node_vm_size
     min_count           = var.min_node_count
     max_count           = var.max_node_count
