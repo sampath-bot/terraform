@@ -1,0 +1,98 @@
+name: Terraform AKS Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - terraform/**
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # ----------------------------
+      # Checkout
+      # ----------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ----------------------------
+      # Azure Login
+      # ----------------------------
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # ----------------------------
+      # Terraform Setup
+      # ----------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      # ----------------------------
+      # Terraform Init
+      # ----------------------------
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      # ----------------------------
+      # Terraform Validate
+      # ----------------------------
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate
+
+      # ----------------------------
+      # Terraform Plan (SAVE PLAN)
+      # ----------------------------
+      - name: Terraform Plan (Save to file)
+        working-directory: terraform
+        run: |
+          terraform plan \
+            -var-file="dev.tfvars" \
+            -out="dev.tfplan"
+
+      # ----------------------------
+      # Upload Plan to Azure Storage
+      # ----------------------------
+      - name: Upload Terraform Plan to Azure Blob
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az storage blob upload \
+              --container-name tfplans \
+              --file terraform/dev.tfplan \
+              --name dev.tfplan \
+              --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+              --overwrite
+
+      # ----------------------------
+      # Download Plan (simulate approval stage)
+      # ----------------------------
+      - name: Download Terraform Plan from Azure Blob
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az storage blob download \
+              --container-name tfplans \
+              --name dev.tfplan \
+              --file terraform/dev.tfplan \
+              --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
+
+      # ----------------------------
+      # Terraform Apply (FROM SAVED PLAN)
+      # ----------------------------
+      - name: Terraform Apply (From Saved Plan)
+        working-directory: terraform
+        run: terraform apply -auto-approve dev.tfplan
