@@ -11,7 +11,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   default_node_pool {
     name                = "kubercicd01"
-    auto_scaling_enabled = false
+    auto_scaling_enabled = true
     vm_size             = var.node_vm_size
     min_count           = var.min_node_count
     max_count           = var.max_node_count
