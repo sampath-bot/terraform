@@ -1,5 +1,5 @@
 resource_group_name = "rg-c2s-raj-poc-dev-001"
-aks_name            = "kubernetes-dev01
+aks_name            = "kubernetes-dev01"
 dns_prefix          = "kubernetes-dev-dns"
 kubernetes_version  = "1.33.5"
 
